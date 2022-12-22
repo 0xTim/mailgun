@@ -162,6 +162,7 @@ fileprivate extension Mailgun {
     }
     
     private func process(_ response: Response) throws -> Response {
+        print("Processing response")
         switch true {
         case response.http.status.code == HTTPStatus.ok.code:
             return response
@@ -197,8 +198,9 @@ fileprivate extension Mailgun {
             try req.content.encode(content)
         }.map { response in
             logger.debug("Response: \(response)")
-            try self.process(response)
-            logger.debug("Response processed")
+            let response = try self.process(response)
+            logger.debug("Response Processed")
+            return response
         }
     }
     
