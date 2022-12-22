@@ -170,6 +170,7 @@ fileprivate extension Mailgun {
     }
     
     private func process(_ response: Response) throws -> Response {
+        print("Processing response")
         switch true {
         case response.http.status.code == HTTPStatus.ok.code:
             return response
@@ -188,6 +189,7 @@ fileprivate extension Mailgun {
     }
 
     private func postRequest<Message: Content>(_ content: Message, endpoint: String, on container: Container) throws -> Future<Response> {
+        let logger = try container.make(Logger.self)
         let authKeyEncoded = try encode(apiKey: self.apiKey)
         
         var headers = HTTPHeaders([])
@@ -197,10 +199,15 @@ fileprivate extension Mailgun {
         
         let client = try container.make(Client.self)
         
+        logger.debug("Sending request to \(mailgunURL)")
+
         return client.post(mailgunURL, headers: headers) { req in
             try req.content.encode(content)
         }.map { response in
-            try self.process(response)
+            logger.debug("Response: \(response)")
+            let response = try self.process(response)
+            logger.debug("Response Processed")
+            return response
         }
     }
     
